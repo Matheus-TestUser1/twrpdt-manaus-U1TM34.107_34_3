@@ -16,6 +16,8 @@ PRODUCT_MANUFACTURER := motorola
 
 PRODUCT_GMS_CLIENTID_BASE := android-motorola
 
+PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,device/motorola/manaus/recovery/root,recovery/root)
+
 PRODUCT_BUILD_PROP_OVERRIDES += \
     PRIVATE_BUILD_DESC="manaus_g_vext-user 12 U1TM34.107-34-3 1c7ca3 release-keys"
 
