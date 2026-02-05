@@ -10,7 +10,7 @@ DEVICE_PATH := device/motorola/edge40neo
 # For building with minimal manifest
 ALLOW_MISSING_DEPENDENCIES := true
 
-# Arquitetura
+# --- 1. Arquitetura e CPU ---
 TARGET_ARCH := arm64
 TARGET_ARCH_VARIANT := armv8-a
 TARGET_CPU_ABI := arm64-v8a
@@ -25,16 +25,56 @@ TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := generic
 TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a55
 
-# Platform - MediaTek
+# --- 2. Plataforma MediaTek ---
 TARGET_BOARD_PLATFORM := mt6879
 TARGET_BOARD_PLATFORM_GPU := mali-g57mc2
 BOARD_VENDOR := mediatek
 TARGET_SOC := mt6879
+BOARD_USES_MTK_HARDWARE := true
+
+# --- 3. Bootloader ---
 TARGET_BOOTLOADER_BOARD_NAME := manaus
 TARGET_NO_BOOTLOADER := true
 TARGET_USES_UEFI := true
 
-# A/B e Partições Dinâmicas
+# --- 4. Kernel e Imagem de Boot (Header V4) ---
+BOARD_BOOTIMG_HEADER_VERSION := 4
+BOARD_KERNEL_BASE := 0x40078000
+BOARD_RAMDISK_OFFSET := 0x11088000
+BOARD_KERNEL_TAGS_OFFSET := 0x07c08000
+BOARD_DTB_OFFSET := 0x07c08000
+BOARD_KERNEL_PAGESIZE := 4096
+
+# Cmdline
+BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2
+BOARD_KERNEL_CMDLINE += loglevel=4
+BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
+
+# Argumentos do Mkbootimg
+BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
+BOARD_MKBOOTIMG_ARGS += --ramdisk_offset $(BOARD_RAMDISK_OFFSET)
+BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
+BOARD_MKBOOTIMG_ARGS += --dtb_offset $(BOARD_DTB_OFFSET)
+BOARD_MKBOOTIMG_ARGS += --base $(BOARD_KERNEL_BASE)
+BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
+
+# Kernel Prebuilt (Arquivos devem existir em /prebuilt)
+TARGET_FORCE_PREBUILT_KERNEL := true
+BOARD_KERNEL_IMAGE_NAME := Image
+TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/Image
+TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
+BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo.img
+
+# Flags essenciais para montar o boot/vendor_boot
+BOARD_INCLUDE_DTB_IN_BOOTIMG := true
+BOARD_KERNEL_SEPARATED_DTBO := true
+BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
+
+# --- 5. Partições Dinâmicas e Virtual A/B ---
+BOARD_SUPPORTS_DYNAMIC_PARTITIONS := true
+BOARD_SUPPORTS_VIRTUAL_AB := true
+BOARD_USES_METADATA_PARTITION := true # Obrigatório para Android 15 VAB
+
 AB_OTA_UPDATER := true
 AB_OTA_PARTITIONS += \
     boot \
@@ -48,99 +88,49 @@ AB_OTA_PARTITIONS += \
     vbmeta_system \
     vbmeta_vendor
 
-BOARD_SUPPORTS_DYNAMIC_PARTITIONS := true
-BOARD_SUPPORTS_VIRTUAL_AB := true
-
-# Configuração de Recovery para Android 13/14/15 (Virtual A/B)
-# No Edge 40 Neo, o ramdisk do recovery vai para o vendor_boot
-BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
+# --- 6. Configuração Crítica de Recovery (Vendor Boot) ---
+# Isso resolve o erro de "Should not set EXCLUDE_KERNEL..." e gera o vendor_boot
 TARGET_NO_RECOVERY := true
 BOARD_USES_RECOVERY_AS_BOOT := false
+BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
 
-# Bootloader
-TARGET_BOOTLOADER_BOARD_NAME := manaus
-TARGET_NO_BOOTLOADER := true
-
-# Display
-TARGET_SCREEN_DENSITY := 450
-TARGET_SCREEN_WIDTH := 1080
-TARGET_SCREEN_HEIGHT := 2400
-TW_THEME := portrait_hdpi
-
-# Kernel e Imagem de Boot (Header Version 4 é obrigatório)
-BOARD_BOOTIMG_HEADER_VERSION := 4
-BOARD_KERNEL_BASE := 0x40078000
-BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2
-BOARD_KERNEL_PAGESIZE := 4096
-BOARD_KERNEL_CMDLINE += loglevel=4
-BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
-BOARD_RAMDISK_OFFSET := 0x11088000
-BOARD_KERNEL_TAGS_OFFSET := 0x07c08000
-BOARD_DTB_OFFSET := 0x07c08000
-
-BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
-BOARD_MKBOOTIMG_ARGS += --ramdisk_offset $(BOARD_RAMDISK_OFFSET)
-BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
-BOARD_MKBOOTIMG_ARGS += --dtb_offset $(BOARD_DTB_OFFSET)
-BOARD_MKBOOTIMG_ARGS += --base $(BOARD_KERNEL_BASE)
-BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
-
-# Kernel - Prebuilt (Certifique-se que os arquivos estão na pasta prebuilt)
-BOARD_KERNEL_IMAGE_NAME := Image
-TARGET_FORCE_PREBUILT_KERNEL := true
-ifeq ($(TARGET_FORCE_PREBUILT_KERNEL),true)
-TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/Image
-TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
-BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo.img
-BOARD_INCLUDE_DTB_IN_BOOTIMG := true
-BOARD_KERNEL_SEPARATED_DTBO := true
-BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
-endif
-
-# Plataforma
-TARGET_BOARD_PLATFORM := mt6879
-BOARD_USES_MTK_HARDWARE := true
-BOARD_RAMDISK_USE_LZ4 := true
-
-# Partições e Filesystems
+# --- 7. Tamanhos e Filesystems ---
 BOARD_FLASH_BLOCK_SIZE := 262144
 BOARD_BOOTIMAGE_PARTITION_SIZE := 67108864
 BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864
 
-# Dynamic Partitions
 BOARD_SUPER_PARTITION_SIZE := 9126805504
 BOARD_SUPER_PARTITION_GROUPS := motorola_dynamic_partitions
 BOARD_MOTOROLA_DYNAMIC_PARTITIONS_PARTITION_LIST := system system_ext product vendor vendor_dlkm
-BOARD_MOTOROLA_DYNAMIC_PARTITIONS_SIZE := 9122611200 # ( BOARD_SUPER_PARTITION_SIZE - 4MB )
+BOARD_MOTOROLA_DYNAMIC_PARTITIONS_SIZE := 9122611200
 
-# System as root
-BOARD_SUPPRESS_SECURE_ERASE := true
-
-# File systems types
 BOARD_HAS_LARGE_FILESYSTEM := true
 BOARD_SYSTEMIMAGE_PARTITION_TYPE := erofs
 BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := erofs
-BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
 BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := erofs
+BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 
-# Hacks de Versão e Segurança para Android 15
+# --- 8. Hacks de Versão (Android 15) ---
 PLATFORM_VERSION := 15
 PLATFORM_SECURITY_PATCH := 2099-12-31
 VENDOR_SECURITY_PATCH := 2099-12-31
 BOARD_AVB_ENABLE := true
 BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
 
-# Configurações TWRP
+# --- 9. TWRP - Interface e Hardware ---
+TW_THEME := portrait_hdpi
 TW_EXTRA_LANGUAGES := true
 TW_SCREEN_BLANK := true
 TW_NO_SCREEN_TIMEOUT := false
 TW_INPUT_BLACKLIST := "hbtp_vm"
 TW_USE_TOOLBOX := true
 TW_INCLUDE_REPACKTOOLS := true
+
+# Brilho
 TW_MAX_BRIGHTNESS := 2047
 TW_DEFAULT_BRIGHTNESS := 1200
 TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
@@ -151,11 +141,11 @@ TW_EXTERNAL_STORAGE_MOUNT_POINT := "external_sd"
 TW_DEFAULT_EXTERNAL_STORAGE := true
 TW_USE_EXTERNAL_STORAGE_FOR_BACKUPS := true
 
-# Logging e Debug
+# Logging
 TARGET_USES_LOGD := true
 TWRP_INCLUDE_LOGCAT := true
 TW_INCLUDE_FB2PNG := true
 
-# Correções de Build (Android 15 SDK)
+# --- 10. Correções de Build (Permissividade) ---
 BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
 BUILD_BROKEN_DUP_RULES := true
