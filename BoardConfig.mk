@@ -158,7 +158,7 @@ TW_EXTERNAL_STORAGE_PATH := "/external_sd"
 TW_EXTERNAL_STORAGE_MOUNT_POINT := "external_sd"
 TW_DEFAULT_EXTERNAL_STORAGE := true
 TW_NO_USB_STORAGE := false
-
+TARGET_COPY_OUT_SYSTEM_EXT := system_ext
 # Crypto (✅ VERIFICADO - FBE v2 + wrappedkey do fstab)
 TW_INCLUDE_CRYPTO := false
 TW_INCLUDE_CRYPTO_FBE := false
