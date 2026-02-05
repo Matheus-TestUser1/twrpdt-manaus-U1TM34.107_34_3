@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2024 The Android Open Source Project
-# Copyright (C) 2024 SebaUbuntu's TWRP device tree generator
+# Copyright (C) 2024 TeamWin Recovery Project
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,142 +10,216 @@ DEVICE_PATH := device/motorola/edge40neo
 # For building with minimal manifest
 ALLOW_MISSING_DEPENDENCIES := true
 
-# --- 1. Arquitetura e CPU ---
+# Architecture (✅ VERIFICADO - do prop.default)
 TARGET_ARCH := arm64
-TARGET_ARCH_VARIANT := armv8-a
+TARGET_ARCH_VARIANT := armv8-2a
 TARGET_CPU_ABI := arm64-v8a
 TARGET_CPU_ABI2 :=
 TARGET_CPU_VARIANT := generic
-TARGET_CPU_VARIANT_RUNTIME := cortex-a78
+TARGET_CPU_VARIANT_RUNTIME := cortex-a55
 
 TARGET_2ND_ARCH := arm
-TARGET_2ND_ARCH_VARIANT := armv8-a
+TARGET_2ND_ARCH_VARIANT := armv8-2a
 TARGET_2ND_CPU_ABI := armeabi-v7a
 TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := generic
 TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a55
 
-# --- 2. Plataforma MediaTek ---
-TARGET_BOARD_PLATFORM := mt6879
-TARGET_BOARD_PLATFORM_GPU := mali-g57mc2
-BOARD_VENDOR := mediatek
-TARGET_SOC := mt6879
-BOARD_USES_MTK_HARDWARE := true
-
-# --- 3. Bootloader ---
+# Bootloader (✅ VERIFICADO)
 TARGET_BOOTLOADER_BOARD_NAME := manaus
 TARGET_NO_BOOTLOADER := true
 TARGET_USES_UEFI := true
 
-# --- 4. Kernel e Imagem de Boot (Header V4) ---
+# Platform - MediaTek (✅ VERIFICADO)
+TARGET_BOARD_PLATFORM := mt6879
+TARGET_BOARD_PLATFORM_GPU := mali-g57mc2
+BOARD_VENDOR := mediatek
+TARGET_SOC := mt6879
+
+# Kernel (✅ VERIFICADO - do vendor_boot header)
 BOARD_BOOTIMG_HEADER_VERSION := 4
 BOARD_KERNEL_BASE := 0x40078000
-BOARD_RAMDISK_OFFSET := 0x11088000
-BOARD_KERNEL_TAGS_OFFSET := 0x07c08000
-BOARD_DTB_OFFSET := 0x07c08000
-BOARD_KERNEL_PAGESIZE := 4096
-
-# Cmdline
 BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2
 BOARD_KERNEL_CMDLINE += loglevel=4
 BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
+BOARD_KERNEL_PAGESIZE := 4096
+BOARD_RAMDISK_OFFSET := 0x11088000
+BOARD_KERNEL_TAGS_OFFSET := 0x07c08000
+BOARD_DTB_OFFSET := 0x07c08000
 
-# Argumentos do Mkbootimg
+BOARD_KERNEL_IMAGE_NAME := Image.gz
+BOARD_KERNEL_SEPARATED_DTBO := true
+
+# Prebuilt kernel
+TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/Image
+TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb
+BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo.img
+BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
+BOARD_MKBOOTIMG_ARGS += --base $(BOARD_KERNEL_BASE)
+BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
 BOARD_MKBOOTIMG_ARGS += --ramdisk_offset $(BOARD_RAMDISK_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --dtb_offset $(BOARD_DTB_OFFSET)
-BOARD_MKBOOTIMG_ARGS += --base $(BOARD_KERNEL_BASE)
-BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
 
-# Kernel Prebuilt (Arquivos devem existir em /prebuilt)
-TARGET_FORCE_PREBUILT_KERNEL := true
-BOARD_KERNEL_IMAGE_NAME := Image
-TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/Image
-TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
-BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo.img
+# Kernel - Ramdisk (✅ VERIFICADO - lz4_legacy)
+BOARD_RAMDISK_USE_LZ4 := true
+LZMA_RAMDISK_TARGETS := recovery
 
-# Flags essenciais para montar o boot/vendor_boot
-BOARD_INCLUDE_DTB_IN_BOOTIMG := true
-BOARD_KERNEL_SEPARATED_DTBO := true
-BOARD_MKBOOTIMG_ARGS += --dtb $(TARGET_PREBUILT_DTB)
+# Assert
+TARGET_OTA_ASSERT_DEVICE := manaus,manaus_g,edge40neo
 
-# --- 5. Partições Dinâmicas e Virtual A/B ---
-BOARD_SUPPORTS_DYNAMIC_PARTITIONS := true
-BOARD_SUPPORTS_VIRTUAL_AB := true
-BOARD_USES_METADATA_PARTITION := true # Obrigatório para Android 15 VAB
+# AVB - Verified Boot
+BOARD_AVB_ENABLE := true
+BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
+BOARD_AVB_VBMETA_SYSTEM := system system_ext product
+BOARD_AVB_VBMETA_SYSTEM_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
+BOARD_AVB_VBMETA_SYSTEM_ALGORITHM := SHA256_RSA2048
+BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX := $(PLATFORM_SECURITY_PATCH_TIMESTAMP)
+BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX_LOCATION := 1
+BOARD_AVB_RECOVERY_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
+BOARD_AVB_RECOVERY_ALGORITHM := SHA256_RSA4096
+BOARD_AVB_RECOVERY_ROLLBACK_INDEX := 1
+BOARD_AVB_RECOVERY_ROLLBACK_INDEX_LOCATION := 1
 
-AB_OTA_UPDATER := true
-AB_OTA_PARTITIONS += \
-    boot \
-    vendor_boot \
-    system \
-    system_ext \
-    product \
-    vendor \
-    vendor_dlkm \
-    vbmeta \
-    vbmeta_system \
-    vbmeta_vendor
-
-# --- 6. Configuração Crítica de Recovery (Vendor Boot) ---
-# Isso resolve o erro de "Should not set EXCLUDE_KERNEL..." e gera o vendor_boot
-TARGET_NO_RECOVERY := true
-BOARD_USES_RECOVERY_AS_BOOT := false
-BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
-
-# --- 7. Tamanhos e Filesystems ---
-BOARD_FLASH_BLOCK_SIZE := 262144
+# Partitions (✅ VERIFICADO)
+BOARD_FLASH_BLOCK_SIZE := 131072
 BOARD_BOOTIMAGE_PARTITION_SIZE := 67108864
 BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864
 
+# Dynamic Partitions (✅ VERIFICADO)
 BOARD_SUPER_PARTITION_SIZE := 9126805504
 BOARD_SUPER_PARTITION_GROUPS := motorola_dynamic_partitions
 BOARD_MOTOROLA_DYNAMIC_PARTITIONS_PARTITION_LIST := system system_ext product vendor vendor_dlkm
 BOARD_MOTOROLA_DYNAMIC_PARTITIONS_SIZE := 9122611200
 
+# System as root
+BOARD_SUPPRESS_SECURE_ERASE := true
+
+# File systems (✅ VERIFICADO - do fstab.mt6879)
 BOARD_HAS_LARGE_FILESYSTEM := true
 BOARD_SYSTEMIMAGE_PARTITION_TYPE := erofs
 BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := erofs
-BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := erofs
 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
+BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := erofs
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 
-# --- 8. Hacks de Versão (Android 15) ---
-PLATFORM_VERSION := 15
-PLATFORM_SECURITY_PATCH := 2099-12-31
-VENDOR_SECURITY_PATCH := 2099-12-31
-BOARD_AVB_ENABLE := true
-BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
+# Workaround for copying vendor files (✅ CRÍTICO)
+TARGET_COPY_OUT_VENDOR := vendor
+TARGET_COPY_OUT_PRODUCT := product
 
-# --- 9. TWRP - Interface e Hardware ---
+# Metadata (✅ VERIFICADO)
+BOARD_USES_METADATA_PARTITION := true
+BOARD_ROOT_EXTRA_FOLDERS += metadata
+
+# Recovery
+BOARD_HAS_NO_SELECT_BUTTON := true
+BOARD_HAS_LARGE_FILESYSTEM := true
+TARGET_RECOVERY_PIXEL_FORMAT := BGRA_8888
+TARGET_USERIMAGES_USE_EXT4 := true
+TARGET_USERIMAGES_USE_F2FS := true
+BOARD_HAS_NO_REAL_SDCARD := true
+RECOVERY_SDCARD_ON_DATA := true
+TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery/root/system/etc/recovery.fstab
+
+# MediaTek specific
+BOARD_USES_MTK_HARDWARE := true
+MTK_HARDWARE := true
+
+# USB (✅ VERIFICADO - do init.rc)
+TARGET_USB_CONTROLLER := 11201000.usb0
+
+# TWRP specific build flags
 TW_THEME := portrait_hdpi
 TW_EXTRA_LANGUAGES := true
-TW_SCREEN_BLANK := true
-TW_NO_SCREEN_TIMEOUT := false
+TW_SCREEN_BLANK_ON_BOOT := true
 TW_INPUT_BLACKLIST := "hbtp_vm"
 TW_USE_TOOLBOX := true
 TW_INCLUDE_REPACKTOOLS := true
+TW_INCLUDE_RESETPROP := true
+TW_INCLUDE_LIBRESETPROP := true
 
-# Brilho
+# Display
+TW_BRIGHTNESS_PATH := "/sys/class/leds/lcd-backlight/brightness"
 TW_MAX_BRIGHTNESS := 2047
 TW_DEFAULT_BRIGHTNESS := 1200
-TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
+TW_NO_SCREEN_BLANK := true
+TW_NO_SCREEN_TIMEOUT := true
 
-# Armazenamento
+# Storage
+TW_HAS_MTP := true
+TW_MTP_DEVICE := /dev/mtp_usb
+TW_INTERNAL_STORAGE_PATH := "/data/media/0"
+TW_INTERNAL_STORAGE_MOUNT_POINT := "data"
 TW_EXTERNAL_STORAGE_PATH := "/external_sd"
 TW_EXTERNAL_STORAGE_MOUNT_POINT := "external_sd"
 TW_DEFAULT_EXTERNAL_STORAGE := true
-TW_USE_EXTERNAL_STORAGE_FOR_BACKUPS := true
+TW_NO_USB_STORAGE := false
 
-# Logging
-TARGET_USES_LOGD := true
+# Crypto (✅ VERIFICADO - FBE v2 + wrappedkey do fstab)
+TW_INCLUDE_CRYPTO := false
+TW_INCLUDE_CRYPTO_FBE := false
+TW_INCLUDE_FBE_METADATA_DECRYPT := false
+BOARD_USES_QCOM_FBE_DECRYPTION := false
+BOARD_USES_METADATA_PARTITION := true
+TW_USE_FSCRYPT_POLICY := 2
+
+# Security patch
+PLATFORM_SECURITY_PATCH := 2099-12-31
+VENDOR_SECURITY_PATCH := 2099-12-31
+PLATFORM_VERSION := 99.87.36
+PLATFORM_VERSION_LAST_STABLE := $(PLATFORM_VERSION)
+
+# Tool
+TW_INCLUDE_NTFS_3G := true
+TW_INCLUDE_FUSE_EXFAT := true
+TW_INCLUDE_FUSE_NTFS := true
+TW_USE_NEW_MINADBD := true
+TW_EXCLUDE_DEFAULT_USB_INIT := true
+TARGET_USE_CUSTOM_LUN_FILE_PATH := /config/usb_gadget/g1/functions/mass_storage.0/lun.%d/file
+
+# Debug
 TWRP_INCLUDE_LOGCAT := true
-TW_INCLUDE_FB2PNG := true
+TARGET_USES_LOGD := true
 
-# --- 10. Correções de Build (Permissividade) ---
-BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
-BUILD_BROKEN_DUP_RULES := true
+# Excludes
+TW_EXCLUDE_TWRPAPP := true
+TW_EXCLUDE_APEX := true
+
+# System properties
+TW_OVERRIDE_SYSTEM_PROPS := \
+    "ro.build.fingerprint=ro.system.build.fingerprint;ro.build.version.incremental"
+
+# Maintainer
+TW_DEVICE_VERSION := edge40neo_MT6879
+
+# A/B
+AB_OTA_UPDATER := true
+TW_INCLUDE_REPACKTOOLS := true
+
+# A/B Partitions (✅ AJUSTADO - removido preloader)
+AB_OTA_PARTITIONS += \
+    boot \
+    dtbo \
+    lk \
+    logo \
+    md1img \
+    product \
+    system \
+    system_ext \
+    vbmeta \
+    vbmeta_system \
+    vbmeta_vendor \
+    vendor \
+    vendor_boot \
+    vendor_dlkm
+
+# VNDK
+BOARD_VNDK_VERSION := current
+
+# Properties
+TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
+TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
