@@ -44,7 +44,6 @@ BOARD_SUPPORTS_VIRTUAL_AB := true
 
 # Configuração de Recovery para Android 13/14/15 (Virtual A/B)
 # No Edge 40 Neo, o ramdisk do recovery vai para o vendor_boot
-BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
 BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
 TARGET_NO_RECOVERY := true
 BOARD_USES_RECOVERY_AS_BOOT := false
