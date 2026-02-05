@@ -22,11 +22,14 @@ PRODUCT_PACKAGES += \
     android.hardware.fastboot@1.0-impl-mock \
     fastbootd
 
-# Boot control HAL (shared module; PRODUCT_STATIC_BOOT_CONTROL_HAL is obsolete)
+# Boot control HAL (fix error PRODUCT_STATIC_BOOT_CONTROL_HAL is obsolete)
 PRODUCT_PACKAGES += \
-    android.hardware.boot@1.0-impl \
     android.hardware.boot@1.0-service \
-    bootctrl.mt6879
+    android.hardware.boot@1.0-impl \
+    android.hardware.boot@1.0-impl.recovery \
+    bootctrl.mt6895 \
+    bootctrl.mt6895.recovery \
+    bootctrl 
 
 # A/B update engine bits (TWRP/OMNI usually keeps these)
 # PRODUCT_PACKAGES += \
