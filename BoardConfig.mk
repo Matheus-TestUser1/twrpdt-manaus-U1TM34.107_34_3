@@ -100,10 +100,10 @@ BOARD_SUPER_PARTITION_SIZE := 9126805504
 BOARD_SUPER_PARTITION_GROUPS := motorola_dynamic_partitions
 BOARD_MOTOROLA_DYNAMIC_PARTITIONS_PARTITION_LIST := system system_ext product vendor vendor_dlkm
 BOARD_MOTOROLA_DYNAMIC_PARTITIONS_SIZE := 9122611200
-
+BOARD_BUILD_SYSTEM_ROOT_IMAGE := false
 # System as root
 BOARD_SUPPRESS_SECURE_ERASE := true
-
+BOARD_HAS_NO_SELECT_BUTTON := true
 # File systems (✅ VERIFICADO - do fstab.mt6879)
 BOARD_HAS_LARGE_FILESYSTEM := true
 BOARD_SYSTEMIMAGE_PARTITION_TYPE := erofs
@@ -114,6 +114,7 @@ BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
 BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := erofs
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
+TW_PREPARE_DATA_MEDIA_EARLY := true
 
 # Workaround for copying vendor files (✅ CRÍTICO)
 TARGET_COPY_OUT_VENDOR := vendor
@@ -208,22 +209,16 @@ TW_DEVICE_VERSION := edge40neo_MT6879
 AB_OTA_UPDATER := true
 TW_INCLUDE_REPACKTOOLS := true
 
-# A/B Partitions (✅ AJUSTADO - removido preloader)
+# A/B
+AB_OTA_UPDATER := true
 AB_OTA_PARTITIONS += \
     boot \
-    dtbo \
-    lk \
-    logo \
-    md1img \
-    product \
     system \
-    system_ext \
-    vbmeta \
-    vbmeta_system \
-    vbmeta_vendor \
     vendor \
-    vendor_boot \
-    vendor_dlkm
+    product \
+    vbmeta \
+    vbmeta_system
+
 
 # VNDK
 BOARD_VNDK_VERSION := current
