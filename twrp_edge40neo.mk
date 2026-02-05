@@ -11,7 +11,7 @@ $(call inherit-product, device/motorola/edge40neo/device.mk)
 PRODUCT_DEVICE := edge40neo
 PRODUCT_NAME := twrp_edge40neo
 PRODUCT_BRAND := motorola
-PRODUCT_MODEL := moto edge (2022)
+PRODUCT_MODEL := moto edge 40 neo
 PRODUCT_MANUFACTURER := motorola
 
 PRODUCT_GMS_CLIENTID_BASE := android-motorola
