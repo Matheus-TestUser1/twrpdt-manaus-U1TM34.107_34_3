@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-LOCAL_PATH := device/motorola/manaus
+LOCAL_PATH := device/motorola/edge40neo
 
 # A/B
 AB_OTA_POSTINSTALL_CONFIG += \
