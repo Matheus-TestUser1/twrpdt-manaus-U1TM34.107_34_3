@@ -1,0 +1,9 @@
+# System properties for Motorola Edge 40 Neo (manaus)
+
+ro.product.board=manaus
+ro.board.platform=mt6879
+ro.hardware.soc.manufacturer=mtk
+
+# USB
+sys.usb.controller=11201000.usb0
+sys.usb.configfs=1

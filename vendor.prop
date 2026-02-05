@@ -1,0 +1,9 @@
+# Vendor properties for Motorola Edge 40 Neo (manaus)
+
+# MediaTek
+ro.vendor.mediatek.platform=MT6879
+ro.vendor.mtk.bt_sap_enable=true
+
+# USB
+persist.sys.usb.config=mtp,adb
+persist.vendor.usb.config=mtp
