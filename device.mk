@@ -21,7 +21,7 @@ PRODUCT_PACKAGES += \
     bootctrl.mt6895 \
     bootctrl.mt6895.recovery \
     bootctrl 
-
+PRODUCT_SHIPPING_API_LEVEL := 31
 PRODUCT_PACKAGES += \
     otapreopt_script \
     cppreopts.sh \
