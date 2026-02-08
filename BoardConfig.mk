@@ -18,6 +18,13 @@ BOARD_VENDOR := motorola
 TARGET_SOC := mt6879
 
 # ============================================================================
+# VENDOR_BOOT V4 - CONFIGURAÇÕES CRÍTICAS (NO TOPO!)
+# ============================================================================
+BOARD_USES_VENDOR_BOOT := true
+BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864
+BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
+
+# ============================================================================
 # ARQUITETURA
 # ============================================================================
 TARGET_ARCH := arm64
@@ -43,7 +50,7 @@ MTK_HARDWARE := true
 PLATFORM_VERSION := 13
 
 # ============================================================================
-# KERNEL - VENDOR_BOOT V4
+# KERNEL
 # ============================================================================
 BOARD_BOOTIMG_HEADER_VERSION := 4
 BOARD_KERNEL_BASE := 0x40078000
@@ -68,27 +75,7 @@ TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb
 BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo.img
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 
-# ============================================================================
-# VENDOR_BOOT V4 - CONFIGURAÇÕES CRÍTICAS
-# ============================================================================
-
-# Tamanho do vendor_boot
-BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864
-
-# Fragmentos de ramdisk (ESSENCIAL para v4)
-BOARD_VENDOR_RAMDISK_FRAGMENTS := recovery
-BOARD_VENDOR_RAMDISK_FRAGMENT.recovery.PARTITION_NAME := vendor_boot
-BOARD_VENDOR_RAMDISK_FRAGMENT.recovery.RAMDISK_NAME := recovery_ramdisk
-BOARD_VENDOR_RAMDISK_FRAGMENT.recovery.KERNEL_MODULE_DIRS := top
-
-# Mover recursos do recovery para vendor_boot
-BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
-
-# Usar vendor_boot
-BOARD_USES_RECOVERY_AS_BOOT := false
-BOARD_USES_VENDOR_BOOT := true
-
-# Recovery ramdisk do vendor_boot stock (TWRP vai injetar binários aqui)
+# Recovery ramdisk do vendor_boot stock
 BOARD_PREBUILT_RECOVERY_RAMDISK := $(DEVICE_PATH)/prebuilt/ramdisk.cpio
 
 # Argumentos mkbootimg
@@ -115,12 +102,12 @@ BOARD_MOTOROLA_DYNAMIC_PARTITIONS_SIZE := 9122611200
 BOARD_HAS_LARGE_FILESYSTEM := true
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
-BOARD_SYSTEMIMAGE_PARTITION_TYPE := erofs
-BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := erofs
-BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := erofs
-BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := erofs
+BOARD_SYSTEMIMAGE_PARTITION_TYPE := ext4
+BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
-BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := erofs
+BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
 
 TARGET_COPY_OUT_VENDOR := vendor
 TARGET_COPY_OUT_PRODUCT := product
@@ -128,7 +115,7 @@ TARGET_COPY_OUT_SYSTEM_EXT := system_ext
 TARGET_COPY_OUT_VENDOR_DLKM := vendor_dlkm
 
 # ============================================================================
-# AVB (ANDROID VERIFIED BOOT)
+# AVB
 # ============================================================================
 BOARD_AVB_ENABLE := true
 BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
@@ -185,7 +172,7 @@ TW_EXCLUDE_DEFAULT_USB_INIT := true
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /config/usb_gadget/g1/functions/mass_storage.0/lun.%d/file
 
 # ============================================================================
-# TWRP - INTERFACE
+# TWRP
 # ============================================================================
 TW_THEME := portrait_hdpi
 TW_EXTRA_LANGUAGES := true
@@ -207,9 +194,6 @@ TW_EXTERNAL_STORAGE_MOUNT_POINT := "external_sd"
 TW_DEFAULT_EXTERNAL_STORAGE := true
 TW_NO_USB_STORAGE := false
 
-# ============================================================================
-# TWRP - FERRAMENTAS
-# ============================================================================
 TW_INCLUDE_NTFS_3G := true
 TW_INCLUDE_FUSE_EXFAT := true
 TW_INCLUDE_FUSE_NTFS := true
@@ -220,9 +204,6 @@ TW_INCLUDE_LIBRESETPROP := true
 TW_EXCLUDE_TWRPAPP := true
 TW_EXCLUDE_APEX := true
 
-# ============================================================================
-# TWRP - CONFIGURAÇÕES ESPECÍFICAS
-# ============================================================================
 TW_NO_BATT_PERCENT := false
 TW_NO_FASTBOOT_BOOT := true
 TW_USE_FSCRYPT_POLICY := 1
@@ -253,7 +234,7 @@ BOARD_USES_QCOM_FBE_DECRYPTION := false
 TARGET_OTA_ASSERT_DEVICE := manaus,manaus_g,edge40neo
 
 # ============================================================================
-# VERSÕES DE SEGURANÇA
+# VERSÕES
 # ============================================================================
 PLATFORM_SECURITY_PATCH := 2099-12-31
 VENDOR_SECURITY_PATCH := 2099-12-31
@@ -263,9 +244,7 @@ VENDOR_SECURITY_PATCH := 2099-12-31
 # ============================================================================
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
-BOARD_USES_VENDOR_BOOT := true
-BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864
-BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
+
 # ============================================================================
 # DEBUG
 # ============================================================================
