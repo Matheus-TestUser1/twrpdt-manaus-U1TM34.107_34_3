@@ -7,6 +7,8 @@
 
 LOCAL_PATH := device/motorola/manaus
 
+PRODUCT_SHIPPING_API_LEVEL := 33
+
 # ✅ ESSENCIAL: Inherit TWRP common
 $(call inherit-product, vendor/twrp/config/common.mk)
 
