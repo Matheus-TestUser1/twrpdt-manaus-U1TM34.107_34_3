@@ -1,59 +1,32 @@
-#import /init.recovery.project.rc
-
-#on init
-   # setprop sys.usb.configfs 1
-   # setprop sys.usb.controller "11201000.usb0"
-
-#on fs && property:ro.debuggable=0
-    # distinguish USB shoulde connect or not, i.e. CDP vs SDP
-    # set charging free due to it wait for USB activation
-
-#on post-fs
-    # Support A/B feature for EMMC and UFS boot region
-    #symlink /dev/block/sda /dev/block/mmcblk0boot0
-    #symlink /dev/block/sdb /dev/block/mmcblk0boot1
-    #symlink /dev/block/mmcblk0boot0 /dev/block/by-name/preloader_a
-    #symlink /dev/block/mmcblk0boot1 /dev/block/by-name/preloader_b
-
-    # Support A/B feature for combo emmc and ufs OTA update
-    #symlink /dev/block/by-name/preloader_a /dev/block/by-name/preloader_emmc_a
-    #symlink /dev/block/by-name/preloader_b /dev/block/by-name/preloader_emmc_b
-    #symlink /dev/block/by-name/preloader_a /dev/block/by-name/preloader_ufs_a
-    3symlink /dev/block/by-name/preloader_b /dev/block/by-name/preloader_ufs_b
-
-    #exec u:r:update_engine:s0 root root -- /system/bin/mtk_plpath_utils
-
-    #symlink /dev/block/mapper/pl_a /dev/block/by-name/preloader_raw_a
-    #symlink /dev/block/mapper/pl_b /dev/block/by-name/preloader_raw_b
-
 # init.recovery.mt6879.rc
-# Recovery init script for Motorola Edge 40 Neo (manaus) - MT6879
+# Main recovery init for Motorola Edge 40 Neo (manaus) - MT6879
 
 import /init.recovery.usb.rc
 
 on early-init
-    # Configurar ambiente
+    # Set up recovery environment
     export ANDROID_ROOT /system_root
     export ANDROID_DATA /data
     export EXTERNAL_STORAGE /sdcard
     
-    # Criar diretórios necessários
+    # Create necessary directories
     mkdir /dev/block 0755 root root
     mkdir /dev/block/platform 0755 root root
     mkdir /dev/block/platform/bootdevice 0755 root root
     mkdir /dev/block/platform/bootdevice/by-name 0755 root root
     
-    # Symlinks para compatibilidade
+    # Symlinks for compatibility
     symlink /dev/block/platform/bootdevice /dev/block/bootdevice
     
-    # Criar mount points
+    # Create mount points
     mkdir /metadata 0771 root root
     mkdir /data 0771 root root
     mkdir /sdcard 0771 root root
     mkdir /external_sd 0771 root root
     mkdir /usb_otg 0771 root root
+    mkdir /tmp 0775 root shell
     
-    # Framebuffer permissions - CRÍTICO PARA DISPLAY
+    # Framebuffer permissions - CRITICAL FOR DISPLAY
     chown root root /dev/graphics/fb0
     chmod 0666 /dev/graphics/fb0
     
@@ -64,7 +37,7 @@ on early-init
     chmod 0666 /sys/class/backlight/panel0-backlight/brightness
 
 on init
-    # Propriedades do dispositivo
+    # Device properties
     setprop ro.hardware mt6879
     setprop ro.hardware.platform mt6879
     setprop ro.board.platform mt6879
@@ -87,21 +60,21 @@ on init
     # MediaTek
     setprop ro.mediatek.platform MT6879
     
-    # Desabilitar verificação de boot
+    # Disable verified boot checks
     setprop ro.boot.verifiedbootstate orange
     setprop ro.boot.vbmeta.device_state unlocked
 
 on fs
-    # Montar metadata
+    # Mount metadata
     mount ext4 /dev/block/by-name/metadata /metadata rw nosuid nodev noatime
     
-    # Tentar montar data (pode falhar se criptografada)
+    # Try to mount data (may fail if encrypted - that's OK)
     mount f2fs /dev/block/by-name/userdata /data rw nosuid nodev noatime || \
     mount ext4 /dev/block/by-name/userdata /data rw nosuid nodev noatime || \
-    echo "Data mount failed"
+    echo "Data mount failed (expected if encrypted)"
 
 on post-fs
-    # Symlinks para partições dinâmicas
+    # Symlinks for dynamic partitions
     symlink /dev/block/mapper/system /dev/block/system
     symlink /dev/block/mapper/vendor /dev/block/vendor
     symlink /dev/block/mapper/product /dev/block/product
@@ -120,20 +93,14 @@ on boot
     chown root root /sys/class/leds/*/brightness
     chmod 0666 /sys/class/leds/*/brightness
     
-    # Bateria
+    # Battery
     chown root root /sys/class/power_supply/battery/capacity
     chmod 0444 /sys/class/power_supply/battery/capacity
     
-    # USB
-    write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/idVendor 22b8
-    write /sys/class/android_usb/android0/idProduct 2e81
-    write /sys/class/android_usb/android0/functions mtp,adb
-    write /sys/class/android_usb/android0/enable 1
-    
-    # Forçar backlight ligado
+    # Force backlight on
     write /sys/class/leds/lcd-backlight/brightness 1200
     
+    # Start ADB
     start adbd
 
 service adbd /system/bin/adbd --root_seclabel=u:r:su:s0
@@ -141,3 +108,7 @@ service adbd /system/bin/adbd --root_seclabel=u:r:su:s0
     socket adbd stream 660 root system
     disabled
     seclabel u:r:adbd:s0
+
+service recovery /system/bin/recovery
+    socket recovery stream 422 system system
+    seclabel u:r:recovery:s0
