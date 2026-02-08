@@ -10,7 +10,7 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
 $(call inherit-product, vendor/twrp/config/common.mk)
 
 # Inherit device configuration
-$(call inherit-product, device/motorola/edge40neo/device.mk)
+$(call inherit-product, device/motorola/manaus/device.mk)
 
 
 PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,device/motorola/manaus/recovery/root,recovery/root)
