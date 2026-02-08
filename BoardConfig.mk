@@ -40,10 +40,10 @@ TARGET_BOARD_PLATFORM := mt6879
 TARGET_BOARD_PLATFORM_GPU := mali-g57mc2
 BOARD_USES_MTK_HARDWARE := true
 MTK_HARDWARE := true
-PLATAFORM_VERSION := 13
+PLATFORM_VERSION := 13  # ❌ Corrigido: era PLATAFORM_VERSION
 
 # ============================================================================
-# KERNEL
+# KERNEL - CORRIGIDO PARA VENDOR_BOOT V4
 # ============================================================================
 BOARD_BOOTIMG_HEADER_VERSION := 4
 BOARD_KERNEL_BASE := 0x40078000
@@ -68,7 +68,27 @@ TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb
 BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilt/dtbo.img
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 
-# Argumentos mkbootimg
+# ============================================================================
+# VENDOR_BOOT V4 - CONFIGURAÇÕES CRÍTICAS ADICIONADAS
+# ============================================================================
+
+# ✅ ADICIONAR: Tamanho do vendor_boot
+BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864
+
+# ✅ ADICIONAR: Fragmentos de ramdisk (ESSENCIAL para v4)
+BOARD_VENDOR_RAMDISK_FRAGMENTS := recovery
+BOARD_VENDOR_RAMDISK_FRAGMENT.recovery.PARTITION_NAME := vendor_boot
+BOARD_VENDOR_RAMDISK_FRAGMENT.recovery.RAMDISK_NAME := recovery_ramdisk
+BOARD_VENDOR_RAMDISK_FRAGMENT.recovery.KERNEL_MODULE_DIRS := top
+
+# ✅ ADICIONAR: Mover recursos do recovery para vendor_boot
+BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
+
+# ✅ ADICIONAR: Usar recovery ramdisk do vendor_boot
+BOARD_USES_RECOVERY_AS_BOOT := false  # Não usar recovery como boot
+BOARD_USES_VENDOR_BOOT := true  # ✅ ESSENCIAL: Indicar que usa vendor_boot
+
+# Argumentos mkbootimg - CORRIGIDO
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
 BOARD_MKBOOTIMG_ARGS += --base $(BOARD_KERNEL_BASE)
 BOARD_MKBOOTIMG_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
@@ -81,13 +101,15 @@ BOARD_MKBOOTIMG_ARGS += --dtb_offset $(BOARD_DTB_OFFSET)
 # ============================================================================
 BOARD_FLASH_BLOCK_SIZE := 131072
 BOARD_BOOTIMAGE_PARTITION_SIZE := 67108864
-BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864
 BOARD_SUPER_PARTITION_SIZE := 9126805504
 BOARD_SUPER_PARTITION_GROUPS := motorola_dynamic_partitions
 BOARD_MOTOROLA_DYNAMIC_PARTITIONS_PARTITION_LIST := system system_ext product vendor vendor_dlkm
 BOARD_MOTOROLA_DYNAMIC_PARTITIONS_SIZE := 9122611200
-BOARD_CUSTOM_BOOTIMG := true
-BOARD_CUSTOM_BOOTIMG_MK := $(DEVICE_PATH)/bootimg.mk
+
+# ❌ REMOVER: BOARD_CUSTOM_BOOTIMG e BOARD_CUSTOM_BOOTIMG_MK
+# A menos que você tenha um bootimg.mk realmente customizado
+# BOARD_CUSTOM_BOOTIMG := true
+# BOARD_CUSTOM_BOOTIMG_MK := $(DEVICE_PATH)/bootimg.mk
 
 # ============================================================================
 # SISTEMA DE ARQUIVOS
@@ -127,7 +149,7 @@ BOARD_AVB_RECOVERY_ROLLBACK_INDEX := 1
 BOARD_AVB_RECOVERY_ROLLBACK_INDEX_LOCATION := 1
 
 # ============================================================================
-# RECOVERY
+# RECOVERY - CORRIGIDO
 # ============================================================================
 BOARD_HAS_NO_SELECT_BUTTON := true
 BOARD_HAS_NO_REAL_SDCARD := true
@@ -138,11 +160,16 @@ TW_PREPARE_DATA_MEDIA_EARLY := true
 BOARD_USES_METADATA_PARTITION := true
 BOARD_ROOT_EXTRA_FOLDERS += metadata
 
+# ❌ REMOVER ESTA LINHA! É o que está quebrando o boot!
+# TARGET_NO_RECOVERY := true
+
 # ============================================================================
-# A/B
+# A/B - CORRIGIDO
 # ============================================================================
 AB_OTA_UPDATER := true
 TW_INCLUDE_REPACKTOOLS := true
+
+# ✅ CORRIGIR: Lista de partições A/B (remover duplicatas se houver)
 AB_OTA_PARTITIONS := \
     boot \
     vendor_boot \
@@ -153,7 +180,6 @@ AB_OTA_PARTITIONS := \
     vendor_dlkm \
     dtbo \
     vbmeta_system \
-    vbmeta_vendor \
     vbmeta
 
 # ============================================================================
@@ -171,11 +197,10 @@ TARGET_USE_CUSTOM_LUN_FILE_PATH := /config/usb_gadget/g1/functions/mass_storage.
 # ============================================================================
 TW_THEME := portrait_hdpi
 TW_EXTRA_LANGUAGES := true
-#TW_SCREEN_BLANK_ON_BOOT := true
 TW_INPUT_BLACKLIST := "hbtp_vm"
 TW_NO_SCREEN_BLANK := true
 TW_NO_SCREEN_TIMEOUT := true
-TW_DEVICE_VERSION := edge40neo_MT6879_Matheus-TestUser1
+TW_DEVICE_VERSION := manaus_MT6879_stable
 
 # Brilho
 TW_BRIGHTNESS_PATH := "/sys/class/leds/lcd-backlight/brightness"
@@ -242,7 +267,9 @@ TARGET_OTA_ASSERT_DEVICE := manaus,manaus_g,edge40neo
 # ============================================================================
 PLATFORM_SECURITY_PATCH := 2099-12-31
 VENDOR_SECURITY_PATCH := 2099-12-31
-TARGET_NO_RECOVERY := true
+
+# ❌ REMOVIDO: TARGET_NO_RECOVERY := true
+
 # ============================================================================
 # PROPRIEDADES
 # ============================================================================
